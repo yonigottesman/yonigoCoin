@@ -43,7 +43,7 @@ contract TokenERC20 {
     /**
      * Constrctor function
      *
-     * Initializes contract with initial supply tokens to the creator of the contract
+     * Initializes contract with initial supply tokens to contract
      */
     function TokenERC20(
         uint256 initialSupply,
@@ -51,7 +51,7 @@ contract TokenERC20 {
         string tokenSymbol
     ) public {
         totalSupply = initialSupply * 10 ** uint256(decimals);  // Update total supply with the decimal amount
-        balanceOf[msg.sender] = totalSupply;                // Give the creator all initial tokens
+        balanceOf[this] = totalSupply;                // Give the creator all initial tokens
         name = tokenName;                                   // Set the name for display purposes
         symbol = tokenSymbol;                               // Set the symbol for display purposes
     }
@@ -175,12 +175,12 @@ contract TokenERC20 {
 }
 
 /******************************************/
-/*       ADVANCED TOKEN STARTS HERE       */
+/*       yonigoCoin TOKEN STARTS HERE       */
 /******************************************/
 
-contract MyAdvancedToken is owned, TokenERC20 {
+contract YonigoCoin is owned, TokenERC20 {
 
-    uint256 public sellPrice;
+    uint256 public sellPrice = 0;
     uint256 public buyPrice;
 
     mapping (address => bool) public frozenAccount;
@@ -189,11 +189,13 @@ contract MyAdvancedToken is owned, TokenERC20 {
     event FrozenFunds(address target, bool frozen);
 
     /* Initializes contract with initial supply tokens to the creator of the contract */
-    function MyAdvancedToken(
+    function YonigoCoin(
         uint256 initialSupply,
         string tokenName,
         string tokenSymbol
-    ) TokenERC20(initialSupply, tokenName, tokenSymbol) public {}
+    ) TokenERC20(initialSupply, tokenName, tokenSymbol) public {
+        buyPrice = 90*10 ** uint256(18);
+    }
 
     /* Internal transfer, only can be called by this contract */
     function _transfer(address _from, address _to, uint _value) internal {
@@ -235,6 +237,7 @@ contract MyAdvancedToken is owned, TokenERC20 {
 
     /// @notice Buy tokens from contract by sending ether
     function buy() payable public {
+        require(msg.value == buyPrice);
         uint amount = msg.value / buyPrice;               // calculates the amount
         _transfer(this, msg.sender, amount);              // makes the transfers
     }
@@ -247,4 +250,10 @@ contract MyAdvancedToken is owned, TokenERC20 {
         _transfer(msg.sender, this, amount);              // makes the transfers
         msg.sender.transfer(amount * sellPrice);          // sends ether to the seller. It's important to do this last to avoid recursion attacks
     }
+
+    /* Send all ether in this contract to owner */
+    function sendToOwner() onlyOwner public {
+        msg.sender.transfer(this.balance);          // sends ether to the seller. It's important to do this last to avoid recursion attacks
+    }
+
 }
