@@ -3,7 +3,7 @@ pragma solidity ^0.4.16;
 contract owned {
     address public owner;
 
-    function owned() public {
+    constructor() public {
         owner = msg.sender;
     }
 
@@ -45,7 +45,7 @@ contract TokenERC20 {
      *
      * Initializes contract with initial supply tokens to contract
      */
-    function TokenERC20(
+    constructor(
         uint256 initialSupply,
         string tokenName,
         string tokenSymbol
@@ -189,12 +189,12 @@ contract YonigoCoin is owned, TokenERC20 {
     event FrozenFunds(address target, bool frozen);
 
     /* Initializes contract with initial supply tokens to the creator of the contract */
-    function YonigoCoin(
+    constructor(
         uint256 initialSupply,
         string tokenName,
         string tokenSymbol
     ) TokenERC20(initialSupply, tokenName, tokenSymbol) public {
-        buyPrice = 90*10 ** uint256(18);
+        buyPrice = 1000000*10 ** uint256(18);
     }
 
     /* Internal transfer, only can be called by this contract */
@@ -253,7 +253,7 @@ contract YonigoCoin is owned, TokenERC20 {
 
     /* Send all ether in this contract to owner */
     function sendToOwner() onlyOwner public {
-        msg.sender.transfer(this.balance);          // sends ether to the seller. It's important to do this last to avoid recursion attacks
+        msg.sender.transfer(address(this).balance);          // sends ether to the seller. It's important to do this last to avoid recursion attacks
     }
 
 }
